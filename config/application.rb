@@ -32,6 +32,11 @@ module Applogic
 
     config.api_only = true
 
+    # Automatically load and reload constants from "lib/*":
+    #   lib/aasm/locking.rb => AASM::Locking
+    # We disable eager load here since lib contains lot of stuff which is not required for typical app functions.
+    config.paths.add 'lib', eager_load: false, autoload: true
+
     # Add app/api to paths, autoload paths
     config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
     config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]

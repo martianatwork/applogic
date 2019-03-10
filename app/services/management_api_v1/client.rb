@@ -20,19 +20,16 @@ module ManagementAPIv1
       end
 
       request_parameters = generate_jwt(payload(request_parameters)) unless options[:jwt]
+      Rails.logger.info "#{request_parameters.to_json}"
       begin
         http_client
-          .public_send(request_method, build_path(request_path), request_parameters)
+          .public_send(request_method, request_path, request_parameters)
           .tap { |response| raise ManagementAPIv1::Exception, response unless response.success? }
           .assert_success!
           .body
       rescue Faraday::Error
         raise ManagementAPIv1::Exception
       end
-    end
-
-    def build_path(path)
-      "management_api/v1/#{path}"
     end
 
     def http_client
@@ -59,7 +56,7 @@ module ManagementAPIv1
       {
         data: data,
         iat:  Time.now.to_i,
-        exp:  Time.now.to_i + 60, # TODO: Configure.
+        exp:  Time.now.to_i + 600, # TODO: Configure.
         jti:  SecureRandom.hex(12),
         iss:  'applogic'
       } # TODO: Configure.

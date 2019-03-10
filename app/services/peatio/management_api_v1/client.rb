@@ -18,12 +18,59 @@ module Peatio
         request(:post, 'withdraws/new', jwt, jwt: true)
       end
 
-      def
-        create_deposit(request_params = {})
+      def show_accounts(request_params = {})
+        self.action = :read_accounts
+        jwt = payload(request_params.slice(:uid, :currency))
+                  .yield_self { |payload| generate_jwt(payload) }
+        request(:post, build_path('accounts/balance'), jwt, jwt: true)
+      end
+
+      def create_deposit(request_params = {})
         self.action = :write_deposits
         jwt = payload(request_params.slice(:uid, :currency, :amount))
                   .yield_self { |payload| generate_jwt(payload) }
-        request(:post, 'deposits/new', jwt, jwt: true)
+        request(:post, build_path('deposits/new'), jwt, jwt: true)
+      end
+
+      def create_transfer(request_params = {})
+        self.action = :write_transfers
+
+        operations = [{
+            currency:  request_params[:currency],
+            amount:    request_params[:amount],
+            account_src: {
+                code:  request_params[:account_src],
+                uid: nil
+            },
+            account_dst: {
+                code:  request_params[:account_dst],
+                uid:   request_params[:uid]
+            }
+        }]
+
+        request_params[:operations] = operations
+
+        jwt = payload(request_params.slice(:key, :kind, :desc, :operations))
+                  .yield_self { |payload| generate_jwt(payload) }
+        request(:post, build_path('transfers/new'), jwt, jwt: true)
+      end
+
+      def create_asset(request_params = {})
+        self.action = :write_deposits
+        jwt = payload(request_params.slice(:uid, :currency, :amount))
+                  .yield_self { |payload| generate_jwt(payload) }
+        request(:post, build_path('assets/new'), jwt, jwt: true)
+      end
+
+      def create_referral(request_params = {})
+        self.action = :write_deposits
+        jwt = payload(request_params.slice(:uid, :currency, :amount))
+                  .yield_self { |payload| generate_jwt(payload) }
+        Rails.logger.info "#{jwt.to_json}"
+        request(:post, build_path('referral/new'), jwt, jwt: true)
+      end
+      def build_path(path)
+        "api/v2/peatio/management/#{path}"
       end
     end
   end

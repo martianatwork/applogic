@@ -9,7 +9,7 @@ module Peatio
       end
 
       def get_currency(currency)
-        request(:get, "currencies/#{currency}")
+        request(:get, "public/currencies/#{currency}")
       end
 
       private
@@ -39,7 +39,7 @@ module Peatio
       end
 
       def build_path(path)
-        "api/v2/#{path}"
+        "api/v2/peatio/#{path}"
       end
     end
   end
